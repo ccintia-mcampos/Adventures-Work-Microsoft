@@ -1,0 +1,100 @@
+-- Selected fields from table Customer
+
+CREATE OR ALTER VIEW Customer AS 
+SELECT 
+	 FirstName + ' ' + LastName AS 'Name'
+	,BirthDate
+	,Gender
+	,YearlyIncome
+	,TotalChildren
+	,EnglishEducation
+	,SpanishEducation
+	,FrenchEducation
+	,HouseOwnerFlag
+	,NumberCarsOwned
+FROM 
+	DimCustomer
+GO
+
+
+-- Select fields from table Employee
+
+
+CREATE OR ALTER VIEW Employees AS 
+SELECT 
+	 FirstName
+	,LastName
+	,Title
+	,HireDate
+	,EmailAddress
+	,Phone
+	,MaritalStatus
+	,Gender
+	,DepartmentName
+	,Status
+FROM 
+	DimEmployee
+WHERE 
+	Status is not null
+GO
+
+-- Selected fields from table DimReseller with Join
+
+CREATE OR ALTER VIEW Resellers AS 
+SELECT
+	 DimReseller.BusinessType
+	,DimReseller.ResellerName
+	,DimReseller.NumberEmployees
+	,DimReseller.ProductLine
+	,DimReseller.BankName
+	,DimReseller.AnnualRevenue
+	,CASE 
+		WHEN DimReseller.MinpaymentAmount IS NULL
+		THEN 0
+		ELSE DimReseller.MinpaymentAmount
+	END AS MinpaymentAmount
+	,DimGeography.StateProvinceName
+	,DimGeography.EnglishCountryRegionName
+	FROM
+		DimReseller
+	LEFT JOIN DimGeography
+	ON DimGeography.GeographyKey = DimReseller.GeographyKey
+GO
+
+-- Selected fields from table FactInternal Sales with Joins 
+
+
+CREATE OR ALTER VIEW InternalSales AS 
+SELECT
+	 FactInternetSales.OrderQuantity
+	,FactInternetSales.UnitPrice
+	,FactInternetSales.DiscountAmount
+	,FactInternetSales.TotalProductCost
+	,FactInternetSales.SalesAmount
+	,FactInternetSales.OrderDate
+	,DimProduct.EnglishProductName
+	,DimDate.EnglishDayNameOfWeek
+	,DimDate.EnglishMonthName
+	,DimDate.CalendarYear
+	,DimPromotion.EnglishPromotionName
+	,DimPromotion.DiscountPct
+	,DimPromotion.EnglishPromotionType
+	,DimPromotion.EnglishPromotionCategory
+	,DimPromotion.MinQty
+	,CASE
+		WHEN DimPromotion.MaxQty IS NULL 
+		THEN 0
+		ELSE DimPromotion.MaxQty
+	 END AS MaxQty
+	,DimSalesTerritory.SalesTerritoryRegion
+	,DimSalesTerritory.SalesTerritoryCountry
+FROM 
+	FactInternetSales
+	LEFT JOIN DimProduct        ON DimProduct.ProductKey               = FactInternetSales.ProductKey
+	LEFT JOIN DimDate           ON DimDate.DateKey                     = FactInternetSales.DueDateKey
+	LEFT JOIN DimPromotion      ON DimPromotion.PromotionKey           = FactInternetSales.PromotionKey
+	LEFT JOIN DimSalesTerritory ON DimSalesTerritory.SalesTerritoryKey = FactInternetSales.SalesTerritoryKey
+GO
+
+	   	 
+
